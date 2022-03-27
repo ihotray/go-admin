@@ -15,6 +15,7 @@ type Config struct {
 	PrimaryKey     PrimaryKey
 	SourceURL      string
 	GetDataFun     GetDataFun
+	PrepareDataFun PrepareDataFun
 	OnlyInfo       bool
 	OnlyNewForm    bool
 	OnlyUpdateForm bool
@@ -64,6 +65,11 @@ func (config Config) SetSourceURL(url string) Config {
 
 func (config Config) SetGetDataFun(fun GetDataFun) Config {
 	config.GetDataFun = fun
+	return config
+}
+
+func (config Config) SetPrepareDataFun(fun PrepareDataFun) Config {
+	config.PrepareDataFun = fun
 	return config
 }
 

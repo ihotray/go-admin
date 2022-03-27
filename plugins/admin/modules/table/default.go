@@ -34,11 +34,14 @@ type DefaultTable struct {
 	connection           string
 	sourceURL            string
 	getDataFun           GetDataFun
+	prepareDataFun       PrepareDataFun
 
 	dbObj db.Connection
 }
 
 type GetDataFun func(params parameter.Parameters) ([]map[string]interface{}, int)
+
+type PrepareDataFun func(data []map[string]interface{})
 
 func NewDefaultTable(cfgs ...Config) Table {
 
@@ -71,6 +74,7 @@ func NewDefaultTable(cfgs ...Config) Table {
 		connection:           cfg.Connection,
 		sourceURL:            cfg.SourceURL,
 		getDataFun:           cfg.GetDataFun,
+		prepareDataFun:       cfg.PrepareDataFun,
 	}
 }
 
@@ -146,6 +150,10 @@ func (tb *DefaultTable) GetData(params parameter.Parameters) (PanelInfo, error) 
 		return tb.getAllDataFromDatabase(params)
 	} else {
 		return tb.getDataFromDatabase(params)
+	}
+
+	if tb.prepareDataFun != nil {
+		tb.prepareDataFun(data)
 	}
 
 	infoList := make(types.InfoList, 0)
@@ -425,6 +433,10 @@ func (tb *DefaultTable) getAllDataFromDatabase(params parameter.Parameters) (Pan
 		return PanelInfo{}, err
 	}
 
+	if tb.prepareDataFun != nil {
+		tb.prepareDataFun(res)
+	}
+
 	infoList := make([]map[string]types.InfoItem, 0)
 
 	for i := 0; i < len(res); i++ {
@@ -566,6 +578,10 @@ func (tb *DefaultTable) getDataFromDatabase(params parameter.Parameters) (PanelI
 
 	if err != nil {
 		return PanelInfo{}, err
+	}
+
+	if tb.prepareDataFun != nil {
+		tb.prepareDataFun(res)
 	}
 
 	infoList := make([]map[string]types.InfoItem, 0)
